@@ -244,7 +244,7 @@ class Memgraph(Database):
         else:
             return len(r) > 0
 
-    def wipe_duplicate_relationships(self, rel_label, source_node_label=None, attr=None, batchSize: int = 10000):
+    def wipe_duplicate_relationships(self, rel_label, source_node_label=None, attr=None, batch_size: int = 10000):
         if source_node_label is not None:
             source_node = f"(a:{source_node_label} {{{attr}}})"
         else:
@@ -252,7 +252,7 @@ class Memgraph(Database):
         query = f"MATCH {source_node}-[r:{rel_label.upper()}]->(b) " \
                 "WITH a, b, COLLECT(r) AS rr " \
                 "WHERE SIZE(rr) > 1 " \
-                f"WITH rr, count(rr) AS freq LIMIT {batchSize} " \
+                f"WITH rr, count(rr) AS freq LIMIT {batch_size} " \
                 "FOREACH (r IN TAIL(rr) | DELETE r) " \
                 "RETURN freq"
 

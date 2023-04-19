@@ -55,7 +55,7 @@ class Database:
         query = f"MATCH ()-[r:{rel_label}]->() DELETE r"
         self.write(query)
 
-    def wipe_duplicate_relationships(self, rel_label, source_node_label=None, attr=None, batchSize: int = 10000):
+    def wipe_duplicate_relationships(self, rel_label, source_node_label=None, attr=None, batch_size: int = 10000):
         pass
 
     def node_count(self, label: str, where: str = None) -> int:
