@@ -160,8 +160,8 @@ class Memgraph(Database):
                     custom_query=None,
                     on_duplicate_edges: str = 'update'):
 
-        if on_duplicate_edges not in ('update', 'increment'):
-            raise ValueError(f'on_duplicate_edges must be either "update" or "increment". {on_duplicate_edges=}')
+        if on_duplicate_edges not in ('update', 'increment', 'duplicate'):
+            raise ValueError(f'on_duplicate_edges must be either "update", "increment" or "duplicate". {on_duplicate_edges=}')
         if add_attributes is not None:
             attributes_statement = ", ".join([
                 f"r.{val} = row.{val}" for val in add_attributes
@@ -181,12 +181,16 @@ class Memgraph(Database):
             },
             'increment': {
                 'create': increment_create_set,
-                'match': 'ON MATCH SET r.weight = r.weight +1'}
+                'match': 'ON MATCH SET r.weight = r.weight +1'},
+            'duplicate':{
+                'create': update_create_set,
+                'match': ''
+            }
         }
 
         unwind_statement = "UNWIND $edge_list AS row"
         match_nodes = f"MATCH (s:{source_label} {{id:row.source}}), (t:{target_label} {{id:row.target}})"
-        merge_rel = f"MERGE (s)-[r:{edge_label}]->(t)"
+        merge_rel = f"{'CREATE' if on_duplicate_edges == 'duplicate' else 'MERGE'} (s)-[r:{edge_label}]->(t)"
         on_create = on_duplicate_options[on_duplicate_edges]['create']
         on_match = on_duplicate_options[on_duplicate_edges]['match']
 
